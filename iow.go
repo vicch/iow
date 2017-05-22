@@ -111,8 +111,8 @@ type Args struct {
 func GetArgs() *Args {
     args := new(Args)
 
-    flag.StringVar(&args.Source, "s", "", "Source language")
-    flag.StringVar(&args.Target, "t", "", "Target language")
+    flag.StringVar(&args.Source, "s", "", "Set source language")
+    flag.StringVar(&args.Target, "t", "", "Set target language")
     flag.BoolVar(&args.List, "l", false, "List supported languages")
     flag.Parse()
 
@@ -150,7 +150,6 @@ func GetConfig() *Config {
 func SetupConfig() error {
     config := new(Config)
     config.ApiKey = GetInput("Google API Key: ")
-    fmt.Println(config.ApiKey)
 
     buf, _ := json.Marshal(config)
     return ioutil.WriteFile(ConfigPath, buf, 0644)
