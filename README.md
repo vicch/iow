@@ -1,7 +1,6 @@
 # In Other Words
 Inline translator written in Go, based on Google Translation API
 
-How to use:
 ```
 iow [OPTION]... [TEXT]
 
