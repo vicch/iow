@@ -15,6 +15,13 @@ iow [OPTION]... [TEXT]
     Use "[]" to wrap word(s) to translate. Example: "Translate this [word]."
 ```
 
+Setup Google API key on first execution:
+```sh
+$ iow -s zh -t en [测试]
+Google API Key: # Paste your API key
+test
+```
+
 Translate single word:
 ```sh
 $ iow -s zh -t en [翻译]
