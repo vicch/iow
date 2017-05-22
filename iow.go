@@ -7,28 +7,96 @@ import (
     "fmt"
     "io/ioutil"
     "log"
+    "net/http"
     "os"
+    "regexp"
     "strings"
 )
 
+const ApiUri = "https://www.googleapis.com/language/translate/v2"
 const ConfigPath = "./.config"
 
 func main() {
     args := GetArgs()
-
-    fmt.Println("Source is", args.Source)
-    fmt.Println("Target is", args.Target)
-    fmt.Println("List is", args.List)
-    fmt.Println("Text is", args.Text)
 
     if (args.List) {
         ListLanguages()
         return
     }
     
+    before := FindWords(args.Text)
+
+    // Nothing to translate
+    if len(before) == 0 {
+        fmt.Println(args.Text)
+        return
+    }
+
+    after := TranslateWords(args.Source, args.Target, before)
+    fmt.Println(ReplaceWords(args.Text, before, after))
+
+    return
+}
+
+/********** Translation **********/
+
+func FindWords(text string) []string {
+    // Find all words to translate (in format "[...]")
+    re := regexp.MustCompile("\\[[^\\[\\]]*\\]")
+    return re.FindAllString(text, -1)
+}
+
+func TranslateWords(source, target string, words []string) []string {
+    after := make([]string, len(words))
+
+    body := CallApi(source, target, words)
+    for i, translation := range body.Data.Translations {
+        after[i] = translation.TranslatedText
+    }
+
+    return after
+}
+
+func ReplaceWords(text string, before, after []string) string {
+    for i, word := range before {
+        text = strings.Replace(text, word, after[i], -1)
+    }
+    return text
+}
+
+/********** API **********/
+
+type Body struct {
+    Data *TranslationsResponse `json:"data"`
+}
+
+type TranslationsResponse struct {
+    Translations []*TranslationsResource `json:"translations,omitempty"`
+}
+
+type TranslationsResource struct {
+    TranslatedText string `json:"translatedText,omitempty"`
+}
+
+func CallApi(source, target string, words []string) *Body {
     config := GetConfig()
-    
-    fmt.Println("Google API key is", config.ApiKey)
+    res, _ := http.Get(MakeApiUri(config.ApiKey, source, target, words))
+    body := new(Body)
+    json.NewDecoder(res.Body).Decode(&body)
+
+    return body
+}
+
+func MakeApiUri(key, source, target string, words []string) string {
+    uri := ApiUri
+    uri += "?key=" + key
+    uri += "&source=" + source
+    uri += "&target=" + target
+    for _, word := range words {
+        // Remove "[" and "]"
+        uri += "&q=" + word[1:len(word)-1]
+    }
+    return uri
 }
 
 /********** Arguments **********/
@@ -53,7 +121,7 @@ func GetArgs() *Args {
     return args
 }
 
-/********** Configs **********/
+/********** Config **********/
 
 type Config struct {
     ApiKey string `json:"api_key"`
@@ -88,7 +156,7 @@ func SetupConfig() error {
     return ioutil.WriteFile(ConfigPath, buf, 0644)
 }
 
-/********** IO **********/
+/********** Auxiliary **********/
 
 func GetInput(prompt string) string {
     fmt.Print(prompt)
@@ -102,8 +170,6 @@ func GetInput(prompt string) string {
 
     return strings.Trim(buf, "\n")
 }
-
-/********** Auxiliary **********/
 
 func ListLanguages() {
     fmt.Print(`Supported languages:
