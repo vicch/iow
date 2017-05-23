@@ -14,17 +14,22 @@ iow [OPTION]... [TEXT]
     Use "[]" to wrap word(s) to translate. Example: "Translate this [word]."
 ```
 
-Setup Google API key on first execution:
+Set up API key and default settings on first execution:
 ```sh
-$ iow -s zh -t en [测试]
-Google API Key: # Paste your API key
-test
+$ iow
+Google API Key: [API key]
+Default source language: [Language code]
+Default target language: [Language code]
 ```
+
+> Note: It is recommended to leave source language empty and use Google Translate auto detection.
 
 Translate single word:
 ```sh
-$ iow -s zh -t en [翻译]
+$ iow -t en [翻译]
 translation
+$ iow -t ja [moon]
+月
 ```
 
 Translate sentence:
@@ -33,8 +38,8 @@ $ iow -s zh -t en "Fly me to the [月亮]. Let me [玩耍] among the stars."
 Fly me to the moon. Let me play among the stars.
 ```
 
-Translate without specifying source language (use auto detection):
+When source/target language is not specified, default settings are used:
 ```sh
-$ iow -t en "Let me see what [春天] is like on [木星] and [火星]."
+$ iow "Let me see what [春天] is like on [木星] and [火星]."
 Let me see what spring is like on Jupiter and Mars.
 ```
