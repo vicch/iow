@@ -1,5 +1,5 @@
 # In Other Words
-Inline translator written in Go, based on Google Translation API
+Command line translator written in Go, based on Google Translation API
 
 ```
 iow [OPTION]... [TEXT]
