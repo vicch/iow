@@ -14,7 +14,7 @@ iow [OPTION]... [TEXT]
     Use "[]" to wrap word(s) to translate. Example: "Translate this [word]."
 ```
 
-Set up API key and default settings on first execution:
+It will ask you to set up API key and default settings on first execution:
 ```sh
 $ iow
 Google API Key: [API key]
