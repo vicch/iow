@@ -24,6 +24,7 @@ func main() {
         return
     }
     
+    config := GetConfig()
     before := FindWords(args.Text)
 
     // Nothing to translate
@@ -32,7 +33,7 @@ func main() {
         return
     }
 
-    after := TranslateWords(args.Source, args.Target, before)
+    after := TranslateWords(before, config, args)
     fmt.Println(ReplaceWords(args.Text, before, after))
 
     return
@@ -46,8 +47,20 @@ func FindWords(text string) []string {
     return re.FindAllString(text, -1)
 }
 
-func TranslateWords(source, target string, words []string) []string {
+func TranslateWords(words []string, config *Config, args *Args) []string {
     after := make([]string, len(words))
+
+    var source, target string
+    if (args.Source != "") {
+        source = args.Source
+    } else {
+        source = config.Source
+    }
+    if (args.Target != "") {
+        target = args.Target
+    } else {
+        target = config.Target
+    }
 
     body := CallApi(source, target, words)
     for i, translation := range body.Data.Translations {
@@ -125,6 +138,8 @@ func GetArgs() *Args {
 
 type Config struct {
     ApiKey string `json:"api_key"`
+    Source string `json:"src_lang"`
+    Target string `json:"tar_lang"`
 }
 
 func GetConfig() *Config {
@@ -149,7 +164,10 @@ func GetConfig() *Config {
 
 func SetupConfig() error {
     config := new(Config)
+
     config.ApiKey = GetInput("Google API Key: ")
+    config.Source = GetInput("Default source language: ")
+    config.Target = GetInput("Default target language: ")
 
     buf, _ := json.Marshal(config)
     return ioutil.WriteFile(ConfigPath, buf, 0644)
